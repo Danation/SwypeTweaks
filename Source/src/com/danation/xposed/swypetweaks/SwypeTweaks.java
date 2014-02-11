@@ -43,19 +43,19 @@ public class SwypeTweaks implements IXposedHookLoadPackage {
 					"startSpeech", new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "startSpeech");
+					XposedBridge.log(logPrefix +  "startSpeech");
 					
 				}
 			});
 			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.IME", lpparam.classLoader,
+			/*XposedHelpers.findAndHookMethod("com.nuance.swype.input.IME", lpparam.classLoader,
 					"startVoiceRecognition", new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 					XposedBridge.log(logPrefix + "startVoiceRecognition");
-					
+					//This one is broken for some reason
 				}
-			});
+			});*/
 			
 			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
 					"showPopupSpeech", new XC_MethodHook() {
@@ -84,14 +84,14 @@ public class SwypeTweaks implements IXposedHookLoadPackage {
 				}
 			});
 			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
+			/*XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
 					"createDictation", new XC_MethodHook() {
 				@Override
 				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 					XposedBridge.log(logPrefix + "createDictation");
-					
+					//This one is broken as well
 				}
-			});
+			});*/
 			
 			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
 					"restartDictation", new XC_MethodHook() {
