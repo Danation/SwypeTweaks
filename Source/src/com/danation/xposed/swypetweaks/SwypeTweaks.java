@@ -2,142 +2,28 @@ package com.danation.xposed.swypetweaks;
 
 import java.lang.reflect.Method;
 
-import de.robv.android.xposed.IXposedHookLoadPackage;
-import de.robv.android.xposed.XC_MethodHook;
-import de.robv.android.xposed.XC_MethodReplacement;
-import de.robv.android.xposed.XposedBridge;
-import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.*;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class SwypeTweaks implements IXposedHookLoadPackage {
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
 		
-		final String logPrefix = "SwypeTweaks: ";
 		final ClassLoader loader = lpparam.classLoader;
 		
-		if (lpparam.packageName.equals("com.nuance.swype.dtc")) {  //twice?  And what about input?
-			//Lcom/nuance/swype/input/SpeechWrapper;->showPopupSpeech()V
-			XposedBridge.log("SwypeTweaks: Found Swype");
-
-			//showPopupSpeech
-			//startDictation
-			//getDictation()
-			
-			//startSpeech(2 params)
-			//createDictation(2 params)
-			//InputView.startSpeech()
-			//input.IME.startVoiceRecognition(String)
-			
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"showPopupSpeech", new XC_MethodReplacement() {
-				@Override
-				protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "Intercepted showPopupSpeech");
-					
-					//try to use findField to get mHostView, which is a com.nuance.swype.input.InputView
-					
-					return null;
-				}
-			});
+		if (lpparam.packageName.equals("com.nuance.swype.dtc")) {
 			
 			XposedHelpers.findAndHookMethod("com.nuance.swype.input.InputView", lpparam.classLoader,
 					"startSpeech", new XC_MethodReplacement() {
 				@Override
-				protected Object replaceHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "Intercepted startSpeech");
+				protected Object replaceHookedMethod(MethodHookParam param) throws Throwable
+				{
+					Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
+					Method mImeStartVoiceRecognition = XposedHelpers.findMethodExact("com.nuance.swype.input.IME", loader, "startVoiceRecognition", String.class);
 					
-					final Class<?> imeClass = XposedHelpers.findClass("com.nuance.swype.input.IME", loader);
-					
-					Object ime = XposedHelpers.getObjectField(param.thisObject, "mIme");
-					Method test = XposedHelpers.findMethodExact("com.nuance.swype.input.IME", loader, "startVoiceRecognition", String.class);
-					test.invoke(ime, "test");
-					
-					//param.thisObject;
-					//try to use findField to get mHostView, which is a com.nuance.swype.input.InputView
+					mImeStartVoiceRecognition.invoke(mIme, "");
 					
 					return null;
-				}
-			});
-
-			/*XposedHelpers.findAndHookMethod("com.nuance.swype.input.InputView", lpparam.classLoader,
-					"startSpeech", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix +  "startSpeech");
-					
-				}
-			});*/
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.IME", lpparam.classLoader,
-					"startVoiceRecognition", String.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "startVoiceRecognition");
-				}
-			});
-			
-			/*XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"showPopupSpeech", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "showPopupSpeech");
-					
-				}
-			});*/
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"handleResumePopupView", android.os.Message.class, new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "handleResumePopupView");
-					
-				}
-			});
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"startDictation", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "startDictation");
-					
-				}
-			});
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"getDictation", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "getDictation");
-					
-				}
-			});
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"resumePopupView", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "resumePopupView");
-					
-				}
-			});
-			
-			/*XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"createDictation", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "createDictation");
-					//This one is broken as well
-				}
-			});*/
-			
-			XposedHelpers.findAndHookMethod("com.nuance.swype.input.SpeechWrapper", lpparam.classLoader,
-					"restartDictation", new XC_MethodHook() {
-				@Override
-				protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-					XposedBridge.log(logPrefix + "restartDictation");
-					
 				}
 			});
 		}
