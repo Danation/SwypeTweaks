@@ -15,6 +15,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable
 	{	
+		final ClassLoader loader = lpparam.classLoader;
 		if (lpparam.packageName.contains("com.nuance.swype"))
 		{	
 			log("Found Swype package: " + lpparam.packageName);
@@ -47,7 +48,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 							//Search list for the voice keyboard
 							for (InputMethodInfo info : inputMethodInfo)
 							{
-								// if (info.getId().contains("iwnnime"))
+								//"iwnnime" is emoji, for future use
 								if (info.getId().contains("googlequicksearchbox"))
 								{
 									inputId = info.getId();
@@ -73,6 +74,66 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 						}
 						return null;
 					}
+				});
+				
+				Class<?> KeyClass = XposedHelpers.findClass("com.nuance.swype.input.KeyboardEx.Key", loader);
+				final int ENTER_CODE = 10;
+				XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", lpparam.classLoader, "handleLongPress", KeyClass, new XC_MethodHook()
+				{
+		            @Override
+		            protected void beforeHookedMethod(MethodHookParam param) throws Throwable
+		            {
+		            	log("before handleLongPress()");
+		            	
+		            	int code = ((int[])XposedHelpers.getObjectField(param.args[0], "codes"))[0];
+
+		            	if (code != ENTER_CODE)
+		            	{
+		            		return;
+		            	}
+		            	
+		            	//Get instance of com.nuance.swype.input.IME
+						Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
+						//Get mIme.myInputMethodImpl
+						Object mIme_myInputMethodImpl = XposedHelpers.getObjectField(mIme, "myInputMethodImpl");
+						//Get mIme.myInputMethodImpl.myToken (needed for switching input method)
+						IBinder mIme_myInputMethodImpl_myToken = (IBinder)XposedHelpers.getObjectField(mIme_myInputMethodImpl, "myToken");
+						
+						InputMethodManager imm = (InputMethodManager)XposedHelpers.callMethod(mIme, "getSystemService", "input_method");
+						
+						try
+						{
+							//Get list of all input methods
+							List<InputMethodInfo> inputMethodInfo = imm.getInputMethodList();
+							String inputId = null;
+							
+							//Search list for the voice keyboard
+							for (InputMethodInfo info : inputMethodInfo)
+							{
+								if (info.getId().contains("iwnnime"))
+								{
+									inputId = info.getId();
+									break;
+								}
+							}
+							
+							//If its found, launch it.  Otherwise, show error message
+							if (inputId != null)
+							{
+								imm.setInputMethod(mIme_myInputMethodImpl_myToken, inputId);
+							}
+							else
+							{
+								log("Emoji input not found");
+								//showMessage("The Google Voice Recognition keyboard was not found", TODO context?);
+							}
+						}
+						catch (IllegalArgumentException ex)
+						{
+							//showMessage("An unexpected error occurred and was logged.", TODO context?);
+							log(ex);
+						}
+		            }
 				});
 			}
 			catch (Exception ex)
