@@ -16,8 +16,10 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable
 	{	
 		final ClassLoader loader = lpparam.classLoader;
+		boolean swypeFound = false;
 		if (lpparam.packageName.contains("com.nuance.swype"))
 		{	
+		    swypeFound = true;
 			log("Found Swype package: " + lpparam.packageName);
 			
 			try
@@ -138,8 +140,13 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 			}
 			catch (Exception ex)
 			{
-				XposedBridge.log(ex);
+				log(ex);
 			}
+		}
+		
+		if (!swypeFound)
+		{
+		    log("No known version of Swype found");
 		}
 	}
 	
