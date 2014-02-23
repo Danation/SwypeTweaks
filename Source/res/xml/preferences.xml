@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <CheckBoxPreference android:summaryOff="Dragon Voice Recognition" android:summary="Use Google Voice Recognition instead of Dragon" android:title="Google or Dragon? (reboot)" android:key="disableDragon" android:summaryOn="Google Voice Recognition" android:defaultValue="true"/>
+    <CheckBoxPreference android:summaryOff="Do not launch iWnn emoji keyboard on longpress of Enter key" android:key="launchiWnn" android:summaryOn="Launch iWnn emoji keyboard on longpress of Enter key" android:defaultValue="false" android:title="Launch iWnn Emoji"/>
+    
+
+</PreferenceScreen>
