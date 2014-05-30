@@ -31,11 +31,8 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 			    {
 			        replaceDragon(lpparam);
 			    }
-				
-			    if (preferences.getBoolean("launchiWnn", false))
-			    {
-			        longPressiWnn(lpparam);
-			    }
+
+			    longPressEnterChangeIME(lpparam);
 			}
 			catch (Exception ex)
 			{
@@ -103,7 +100,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
         });
 	}
 	
-	private void longPressiWnn(LoadPackageParam lpparam)
+	private void longPressEnterChangeIME(LoadPackageParam lpparam)
     {
         final ClassLoader loader = lpparam.classLoader;
         
@@ -123,6 +120,14 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                     return;
                 }
                 
+                XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
+                String inputId = preferences.getString("longPressAction", "None");
+                
+                if (inputId.equals("None"))
+                {
+                	return;
+                }
+                
                 //Get instance of com.nuance.swype.input.IME
                 Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
                 //Get mIme.myInputMethodImpl
@@ -134,29 +139,26 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 
                 try
                 {
+                	boolean changedInput = false;
+                	
                     //Get list of all input methods
                     List<InputMethodInfo> inputMethodInfo = imm.getInputMethodList();
-                    String inputId = null;
                     
-                    //Search list for the voice keyboard
+                    //Search list for the right keyboard
                     for (InputMethodInfo info : inputMethodInfo)
                     {
-                        if (info.getId().contains("iwnnime"))
+                        if (info.getId().equals(inputId))
                         {
-                            inputId = info.getId();
+                        	imm.setInputMethod(mIme_myInputMethodImpl_myToken, inputId);
+                        	changedInput = true;
                             break;
                         }
                     }
                     
-                    //If its found, launch it.  Otherwise, show error message
-                    if (inputId != null)
+                    if (!changedInput)
                     {
-                        imm.setInputMethod(mIme_myInputMethodImpl_myToken, inputId);
-                    }
-                    else
-                    {
-                        log("Emoji input not found");
-                        //showMessage("The Google Voice Recognition keyboard was not found", TODO context?);
+                        log(inputId + ": input not found");
+                        //showMessage("keyboard was not found", TODO context?);
                     }
                 }
                 catch (IllegalArgumentException ex)
