@@ -55,46 +55,9 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 
                 //Get instance of com.nuance.swype.input.IME
                 Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
-                //Get mIme.myInputMethodImpl
-                Object mIme_myInputMethodImpl = XposedHelpers.getObjectField(mIme, "myInputMethodImpl");
-                //Get mIme.myInputMethodImpl.myToken (needed for switching input method)
-                IBinder mIme_myInputMethodImpl_myToken = (IBinder)XposedHelpers.getObjectField(mIme_myInputMethodImpl, "myToken");
                 
-                InputMethodManager imm = (InputMethodManager)XposedHelpers.callMethod(mIme, "getSystemService", "input_method");
+                switchIME(mIme, "com.google.android.googlequicksearchbox/com.google.android.voicesearch.ime.VoiceInputMethodService");
                 
-                try
-                {
-                    //Get list of all input methods
-                    List<InputMethodInfo> inputMethodInfo = imm.getInputMethodList();
-                    String inputId = null;
-                    
-                    //Search list for the voice keyboard
-                    for (InputMethodInfo info : inputMethodInfo)
-                    {
-                        //"iwnnime" is emoji, for future use
-                        if (info.getId().contains("googlequicksearchbox"))
-                        {
-                            inputId = info.getId();
-                            break;
-                        }
-                    }
-                    
-                    //If its found, launch it.  Otherwise, show error message
-                    if (inputId != null)
-                    {
-                        imm.setInputMethod(mIme_myInputMethodImpl_myToken, inputId);
-                    }
-                    else
-                    {
-                        log("Voice input not found");
-                        //showMessage("The Google Voice Recognition keyboard was not found", TODO context?);
-                    }
-                }
-                catch (IllegalArgumentException ex)
-                {
-                    //showMessage("An unexpected error occurred and was logged.", TODO context?);
-                    log(ex);
-                }
                 return null;
             }
         });
@@ -130,52 +93,57 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 
                 //Get instance of com.nuance.swype.input.IME
                 Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
-                //Get mIme.myInputMethodImpl
-                Object mIme_myInputMethodImpl = XposedHelpers.getObjectField(mIme, "myInputMethodImpl");
-                //Get mIme.myInputMethodImpl.myToken (needed for switching input method)
-                IBinder mIme_myInputMethodImpl_myToken = (IBinder)XposedHelpers.getObjectField(mIme_myInputMethodImpl, "myToken");
                 
-                InputMethodManager imm = (InputMethodManager)XposedHelpers.callMethod(mIme, "getSystemService", "input_method");
-                
-                try
-                {
-                	boolean changedInput = false;
-                	
-                    //Get list of all input methods
-                    List<InputMethodInfo> inputMethodInfo = imm.getInputMethodList();
-                    
-                    //Search list for the right keyboard
-                    for (InputMethodInfo info : inputMethodInfo)
-                    {
-                        if (info.getId().equals(inputId))
-                        {
-                        	imm.setInputMethod(mIme_myInputMethodImpl_myToken, inputId);
-                        	changedInput = true;
-                            break;
-                        }
-                    }
-                    
-                    if (!changedInput)
-                    {
-                        log(inputId + ": input not found");
-                        //showMessage("keyboard was not found", TODO context?);
-                    }
-                }
-                catch (IllegalArgumentException ex)
-                {
-                    //showMessage("An unexpected error occurred and was logged.", TODO context?);
-                    log(ex);
-                }
+                switchIME(mIme, inputId);
             }
         });
 	}
 	
-	@SuppressWarnings("unused")
-    private static void showMessage(String message, Context context)
+	private static void switchIME(Object mIme, String inputId)
 	{
-		log("attempting to show toast");
-		Toast toast = Toast.makeText(context, message, Toast.LENGTH_SHORT);
-		toast.show();
+		Context context = (Context)XposedHelpers.callMethod(mIme, "getApplicationContext");
+        
+        //Get mIme.myInputMethodImpl
+        Object mIme_myInputMethodImpl = XposedHelpers.getObjectField(mIme, "myInputMethodImpl");
+        //Get mIme.myInputMethodImpl.myToken (needed for switching input method)
+        IBinder mIme_myInputMethodImpl_myToken = (IBinder)XposedHelpers.getObjectField(mIme_myInputMethodImpl, "myToken");
+        
+        InputMethodManager imm = (InputMethodManager)XposedHelpers.callMethod(mIme, "getSystemService", "input_method");
+        
+        try
+        {
+        	boolean changedInput = false;
+        	
+            //Get list of all input methods
+            List<InputMethodInfo> inputMethodInfo = imm.getInputMethodList();
+            
+            //Search list for the right keyboard
+            for (InputMethodInfo info : inputMethodInfo)
+            {
+                if (info.getId().equalsIgnoreCase(inputId))
+                {
+                	imm.setInputMethod(mIme_myInputMethodImpl_myToken, inputId);
+                	changedInput = true;
+                    break;
+                }
+            }
+            
+            if (!changedInput)
+            {
+                log(inputId + ": input not found");
+                showMessage(inputId + " keyboard was not found", context);
+            }
+        }
+        catch (IllegalArgumentException ex)
+        {
+            showMessage("An unexpected error occurred and was logged.", context);
+            log(ex);
+        }
+	}
+	
+	private static void showMessage(String message, Context context)
+	{
+		Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 	}
 	
 	private static final String logPrefix = "SwypeTweaks: ";
