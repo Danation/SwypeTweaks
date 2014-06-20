@@ -9,18 +9,33 @@
         android:summaryOff="Dragon Voice Recognition"
         />
     <PreferenceCategory android:title="Other" android:key="otherCategory" />
+    <PreferenceCategory android:title="Color" android:key="colorCategory" />
     <CheckBoxPreference
-        android:key="changeTraceColor"
-        android:title="Change Trace Color? (reboot)"
+        android:key="changeColors"
+        android:title="Change Colors? (reboot)"
         android:defaultValue="false"
-        android:summary="Change the color of Swype's trace"
-        android:summaryOn="Trace color is changed"
-        android:summaryOff="Trace color is unchanged"
+        android:summary="Change the color of Swype's elements"
     />
     <net.margaritov.preference.colorpicker.ColorPickerPreference
-	    android:dependency="changeTraceColor"
+	    android:dependency="changeColors"
 	    android:key="traceColor"
 	    android:title="Trace Color"
+	    android:defaultValue="0xb2ffa200"
+	    alphaSlider="true"
+	    hexValue="true"
+	/>
+    <net.margaritov.preference.colorpicker.ColorPickerPreference
+	    android:dependency="changeColors"
+	    android:key="altTextColor"
+	    android:title="Alt Key Text Color"
+	    android:defaultValue="0xb2ffa200"
+	    alphaSlider="true"
+	    hexValue="true"
+	/>
+    <net.margaritov.preference.colorpicker.ColorPickerPreference
+	    android:dependency="changeColors"
+	    android:key="popupTextColor"
+	    android:title="Popup Text Color"
 	    android:defaultValue="0xb2ffa200"
 	    alphaSlider="true"
 	    hexValue="true"
