@@ -3,6 +3,7 @@ package com.danation.xposed.swypetweaks;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.IBinder;
 import android.view.inputmethod.InputMethodInfo;
@@ -51,9 +52,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 	{
 	    final ClassLoader loader = lpparam.classLoader;
 	    
-	    Class<?> CanvasClass = XposedHelpers.findClass("android.graphics.Canvas", loader);
-	    
-        XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", loader, "bufferDrawTrace", CanvasClass, new XC_MethodHook()
+        XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", loader, "bufferDrawTrace", Canvas.class, new XC_MethodHook()
         {
             
             @Override
