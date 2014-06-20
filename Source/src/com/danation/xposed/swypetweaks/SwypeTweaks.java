@@ -3,6 +3,7 @@ package com.danation.xposed.swypetweaks;
 import java.util.List;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.IBinder;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -33,6 +34,11 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 			    }
 
 			    longPressEnterChangeIME(lpparam);
+            	
+            	if (preferences.getBoolean("changeTraceColor", false))
+            	{
+            		changeTraceColor(lpparam);
+            	}
 			}
 			catch (Exception ex)
 			{
@@ -41,6 +47,36 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 		}
 	}
 	
+	private void changeTraceColor(LoadPackageParam lpparam)
+	{
+	    final ClassLoader loader = lpparam.classLoader;
+	    
+	    Class<?> CanvasClass = XposedHelpers.findClass("android.graphics.Canvas", loader);
+	    
+        XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", loader, "bufferDrawTrace", CanvasClass, new XC_MethodHook()
+        {
+            
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable
+            {
+            	log("Replacing trace color before bufferDrawTrace()");
+            	XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
+            	
+                String colorString = preferences.getString("traceColor", "");
+                
+                try
+                {
+                	int miTraceColor = Color.parseColor(colorString);
+            	
+                	XposedHelpers.setIntField(param.thisObject, "miTraceColor", miTraceColor);
+                }
+                catch (IllegalArgumentException ex)
+                {
+                	log("Invalid color");
+                }                
+            }
+        });
+	}
 	private void replaceDragon(LoadPackageParam lpparam)
 	{
 	    final ClassLoader loader = lpparam.classLoader;

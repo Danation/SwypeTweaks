@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <CheckBoxPreference android:summaryOff="Dragon Voice Recognition" android:summary="Use Google Voice Recognition instead of Dragon" android:title="Google or Dragon? (reboot)" android:key="disableDragon" android:summaryOn="Google Voice Recognition" android:defaultValue="true"/>
+    <CheckBoxPreference
+        android:key="disableDragon"
+        android:title="Google or Dragon? (reboot)"
+        android:defaultValue="true"
+        android:summary="Use Google Voice Recognition instead of Dragon"
+        android:summaryOn="Google Voice Recognition"
+        android:summaryOff="Dragon Voice Recognition"
+        />
     <PreferenceCategory android:title="Other" android:key="otherCategory" />
+    <CheckBoxPreference
+        android:key="changeTraceColor"
+        android:title="Change Trace Color? (reboot)"
+        android:defaultValue="false"
+        android:summary="Change the color of Swype's trace"
+        android:summaryOn="Trace color is changed"
+        android:summaryOff="Trace color is unchanged"
+    />
+    <com.danation.xposed.swypetweaks.EditTextPreference
+        android:dependency="changeTraceColor"
+        android:key="traceColor"
+        android:title="Trace Color"
+		android:defaultValue="#b2ffa200"
+    />
 </PreferenceScreen>
