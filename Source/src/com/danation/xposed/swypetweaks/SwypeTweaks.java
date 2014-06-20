@@ -61,18 +61,8 @@ public class SwypeTweaks implements IXposedHookLoadPackage
             	log("Replacing trace color before bufferDrawTrace()");
             	XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
             	
-                String colorString = preferences.getString("traceColor", "");
-                
-                try
-                {
-                	int miTraceColor = Color.parseColor(colorString);
-            	
-                	XposedHelpers.setIntField(param.thisObject, "miTraceColor", miTraceColor);
-                }
-                catch (IllegalArgumentException ex)
-                {
-                	log("Invalid color");
-                }                
+            	int miTraceColor = preferences.getInt("traceColor", 0xb2ffa200);
+            	XposedHelpers.setIntField(param.thisObject, "miTraceColor", miTraceColor);               
             }
         });
 	}

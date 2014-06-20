@@ -17,10 +17,13 @@
         android:summaryOn="Trace color is changed"
         android:summaryOff="Trace color is unchanged"
     />
-    <com.danation.xposed.swypetweaks.EditTextPreference
-        android:dependency="changeTraceColor"
-        android:key="traceColor"
-        android:title="Trace Color"
-		android:defaultValue="#b2ffa200"
-    />
+    <net.margaritov.preference.colorpicker.ColorPickerPreference
+	    android:dependency="changeTraceColor"
+	    android:key="traceColor"
+	    android:title="Trace Color"
+	    android:defaultValue="0xb2ffa200"
+	    alphaSlider="true"
+	    hexValue="true"
+	/>
+    
 </PreferenceScreen>
