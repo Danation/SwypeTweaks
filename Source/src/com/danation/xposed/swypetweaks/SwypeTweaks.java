@@ -5,9 +5,6 @@ import java.util.List;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.os.IBinder;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -27,22 +24,19 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 		{	
 			log("Found Swype package: " + lpparam.packageName);
 			
-			XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
-			//preferences.makeWorldReadable();
-			
 			try
 			{
-			    if (preferences.getBoolean("disableDragon", true))
-			    {
-			        replaceDragon(lpparam);
-			    }
-
+                XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
+                
+                if (preferences.getBoolean("changeColors", false))
+                {
+                    changeColors(lpparam);
+                }
+                if (preferences.getBoolean("disableDragon", true))
+                {
+                    replaceDragon(lpparam);
+                }
 			    longPressEnterChangeIME(lpparam);
-            	
-            	if (preferences.getBoolean("changeColors", false))
-            	{
-            		changeColors(lpparam);
-            	}
 			}
 			catch (Exception ex)
 			{
@@ -55,45 +49,34 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 	{
 	    final ClassLoader loader = lpparam.classLoader;
 	    
-	    
-        XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", loader, "bufferDrawTrace", Canvas.class, new XC_MethodHook()
+        XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", loader, "bufferDrawKeyboard", Canvas.class, new XC_MethodHook()
         {
             
             @Override
             protected void beforeHookedMethod(MethodHookParam param) throws Throwable
             {
-            	log("Replacing trace color before bufferDrawTrace()");
-            	XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
-            	
-            	int miTraceColor = preferences.getInt("traceColor", 0xb2ffa200);
-            	XposedHelpers.setIntField(param.thisObject, "miTraceColor", miTraceColor);               
-            }
-        });
-        
-        Class<?> KeyClass = XposedHelpers.findClass("com.nuance.swype.input.KeyboardEx.Key", loader);
-        
-        XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", loader, "drawKey", Canvas.class, Paint.class, KeyClass, Rect.class, int.class, int.class, new XC_MethodHook()
-        {
-            
-            @Override
-            protected void beforeHookedMethod(MethodHookParam param) throws Throwable
-            {
-            	log("Replacing colors before drawKey()");
-            	XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
-            	
-            	Object key = param.args[2];
-            	
-            	XposedHelpers.setIntField(key, "altTextColor", preferences.getInt("altTextColor", 0xFFFFFFFF));
-            	XposedHelpers.setIntField(param.thisObject, "mPopupTextColor", preferences.getInt("popupTextColor", 0xFF000000));
-            	
-            	ColorStateList textColor = ColorStateList.valueOf(preferences.getInt("keyTextColor", 0xFFFFFFFF));
-            	XposedHelpers.setObjectField(key, "mKeyTextColor", textColor);
-            	
-            	//These don't seem to do much, as far as I can tell...
-            	//XposedHelpers.setIntField(key, "mDefaultStrokeCandidateColor", 0xFFFF0000);
-            	//XposedHelpers.setIntField(param.thisObject, "mAltShadowColor", 0xFFFF0000);
-            	//XposedHelpers.setIntField(param.thisObject, "mShadowColor", 0xFFFF0000);
-            	//XposedHelpers.setIntField(param.thisObject, "miHighlightTextColor", 0xFFFF0000);
+                XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
+
+                XposedHelpers.setIntField(param.thisObject, "miTraceColor", preferences.getInt("traceColor", 0xb2ffa200));
+                
+                XposedHelpers.setIntField(param.thisObject, "mPopupTextColor", preferences.getInt("popupTextColor", 0xFF000000));
+                
+                ColorStateList textColor = ColorStateList.valueOf(preferences.getInt("keyTextColor", 0xFFFFFFFF));
+                int altTextColor = preferences.getInt("altTextColor", 0xFFFFFFFF);
+                
+                Object[] keys = (Object[])XposedHelpers.getObjectField(param.thisObject, "mKeys");
+                for (Object key : keys)
+                {
+                    XposedHelpers.setObjectField(key, "mKeyTextColor", textColor);
+                    XposedHelpers.setIntField(key, "altTextColor", altTextColor);
+                }
+                
+                //These don't seem to do much, as far as I can tell...
+                //XposedHelpers.setIntField(key, "mDefaultStrokeCandidateColor", 0xFFFF0000);
+                //XposedHelpers.setIntField(param.thisObject, "mAltShadowColor", 0xFFFF0000);
+                //XposedHelpers.setIntField(param.thisObject, "mShadowColor", 0xFFFF0000);
+                //XposedHelpers.setIntField(param.thisObject, "miHighlightTextColor", 0xFFFF0000);
+
             }
         });
 	}
@@ -101,20 +84,12 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 	{
 	    final ClassLoader loader = lpparam.classLoader;
 	    
-        XposedHelpers.findAndHookMethod("com.nuance.swype.input.InputView", loader, "startSpeech", new XC_MethodReplacement()
+	    XposedHelpers.findAndHookMethod("com.nuance.swype.input.IMEApplication", loader, "getSpeechProvider", new XC_MethodReplacement()
         {
-            
             @Override
             protected Object replaceHookedMethod(MethodHookParam param) throws Throwable
             {
-                log("Replacing startSpeech()");
-                
-                //Get instance of com.nuance.swype.input.IME
-                Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
-                
-                switchIME(mIme, "com.google.android.googlequicksearchbox/com.google.android.voicesearch.ime.VoiceInputMethodService");
-                
-                return null;
+                return 1;
             }
         });
 	}
