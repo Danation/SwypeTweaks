@@ -26,9 +26,17 @@
 	/>
     <net.margaritov.preference.colorpicker.ColorPickerPreference
 	    android:dependency="changeColors"
+	    android:key="keyTextColor"
+	    android:title="Key Text Color"
+	    android:defaultValue="0xffffffff"
+	    alphaSlider="true"
+	    hexValue="true"
+	/>
+    <net.margaritov.preference.colorpicker.ColorPickerPreference
+	    android:dependency="changeColors"
 	    android:key="altTextColor"
 	    android:title="Alt Key Text Color"
-	    android:defaultValue="0xb2ffa200"
+	    android:defaultValue="0xffffffff"
 	    alphaSlider="true"
 	    hexValue="true"
 	/>

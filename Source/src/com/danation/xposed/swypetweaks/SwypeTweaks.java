@@ -3,6 +3,7 @@ package com.danation.xposed.swypetweaks;
 import java.util.List;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -84,6 +85,9 @@ public class SwypeTweaks implements IXposedHookLoadPackage
             	
             	XposedHelpers.setIntField(key, "altTextColor", preferences.getInt("altTextColor", 0xFFFFFFFF));
             	XposedHelpers.setIntField(param.thisObject, "mPopupTextColor", preferences.getInt("popupTextColor", 0xFF000000));
+            	
+            	ColorStateList textColor = ColorStateList.valueOf(preferences.getInt("keyTextColor", 0xFFFFFFFF));
+            	XposedHelpers.setObjectField(key, "mKeyTextColor", textColor);
             	
             	//These don't seem to do much, as far as I can tell...
             	//XposedHelpers.setIntField(key, "mDefaultStrokeCandidateColor", 0xFFFF0000);
