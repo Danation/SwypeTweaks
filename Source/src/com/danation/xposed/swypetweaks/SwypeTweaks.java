@@ -92,6 +92,23 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 return 1;
             }
         });
+	    
+        XposedHelpers.findAndHookMethod("com.nuance.swype.input.InputView", loader, "startSpeech", new XC_MethodReplacement()
+        {
+            
+            @Override
+            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable
+            {
+                log("Replacing startSpeech()");
+                
+                //Get instance of com.nuance.swype.input.IME
+                Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
+                
+                switchIME(mIme, "com.google.android.googlequicksearchbox/com.google.android.voicesearch.ime.VoiceInputMethodService");
+                
+                return null;
+            }
+        });
 	}
 	
 	private void longPressEnterChangeIME(LoadPackageParam lpparam)
