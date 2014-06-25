@@ -44,7 +44,7 @@
 	    android:dependency="changeColors"
 	    android:key="popupTextColor"
 	    android:title="Popup Text Color"
-	    android:defaultValue="0xb2ffa200"
+	    android:defaultValue="0xffffffff"
 	    alphaSlider="true"
 	    hexValue="true"
 	/>
