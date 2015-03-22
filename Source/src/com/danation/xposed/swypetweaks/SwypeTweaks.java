@@ -41,6 +41,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 	disableEmoji(lpparam);
                 }
 			    longPressEnterChangeIME(lpparam);
+                lowerLongpressMinimum(lpparam);
 			}
 			catch (Exception ex)
 			{
@@ -172,7 +173,22 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 			}
 		});
 	}
-	
+
+    private void lowerLongpressMinimum(LoadPackageParam lpparam)
+    {
+        XposedHelpers.findAndHookMethod("android.content.res.Resources", lpparam.classLoader,
+                "getInteger", int.class, new XC_MethodHook() {
+                    @Override
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        if (((Resources)param.thisObject).getResourceEntryName(
+                                        (Integer)param.args[0]).equals("long_press_timeout_min_ms"))
+                            param.setResult(50);
+                    }
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    }
+                });
+    }
+
 	private static void switchIME(Object mIme, String inputId)
 	{
 		Context context = (Context)XposedHelpers.callMethod(mIme, "getApplicationContext");
