@@ -4,6 +4,7 @@ import java.util.List;
 
 import android.content.Context;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.os.IBinder;
 import android.view.inputmethod.InputMethodInfo;
@@ -36,6 +37,9 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 {
                     replaceDragon(lpparam);
                 }
+                if (preferences.getBoolean("disableEmoji", false)) {
+                	disableEmoji(lpparam);
+                }
 			    longPressEnterChangeIME(lpparam);
 			}
 			catch (Exception ex)
@@ -57,7 +61,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
             {
                 XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
 
-                XposedHelpers.setIntField(param.thisObject, "miTraceColor", preferences.getInt("traceColor", 0xb2ffa200));
+                XposedHelpers.setIntField(param.thisObject, "miTraceColor", preferences.getInt("traceColorInt", 0xb2ffa200));
                 
                 XposedHelpers.setIntField(param.thisObject, "mPopupTextColor", preferences.getInt("popupTextColor", 0xFF000000));
                 
@@ -80,18 +84,24 @@ public class SwypeTweaks implements IXposedHookLoadPackage
             }
         });
 	}
+	
 	private void replaceDragon(LoadPackageParam lpparam)
 	{
 	    final ClassLoader loader = lpparam.classLoader;
 	    
-	    XposedHelpers.findAndHookMethod("com.nuance.swype.input.IMEApplication", loader, "getSpeechProvider", new XC_MethodReplacement()
-        {
-            @Override
-            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable
-            {
-                return 1;
-            }
-        });
+	    try { //this method might not be in all versions of Swype
+		    XposedHelpers.findAndHookMethod("com.nuance.swype.input.IMEApplication", loader, "getSpeechProvider", new XC_MethodReplacement()
+	        {
+	            @Override
+	            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable
+	            {
+	                return 1;
+	            }
+	        });
+	    }
+	    catch (Exception ex) {
+	    	log(ex);
+	    }
 	    
         XposedHelpers.findAndHookMethod("com.nuance.swype.input.InputView", loader, "startSpeech", new XC_MethodReplacement()
         {
@@ -145,6 +155,22 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 switchIME(mIme, inputId);
             }
         });
+	}
+	
+	private void disableEmoji(LoadPackageParam lpparam)
+	{
+		XposedHelpers.findAndHookMethod("android.content.res.Resources", lpparam.classLoader,
+				"getBoolean", int.class, new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+				if ((Boolean)param.getResult() && 
+						((Resources)param.thisObject).getResourceEntryName(
+								(Integer)param.args[0]).equals("enable_emoji_in_english_ldb")) 
+					param.setResult(false);
+			}
+			protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+			}
+		});
 	}
 	
 	private static void switchIME(Object mIme, String inputId)
