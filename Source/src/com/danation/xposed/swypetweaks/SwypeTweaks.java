@@ -41,6 +41,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 	disableEmoji(lpparam);
                 }
 			    longPressEnterChangeIME(lpparam);
+			    pressSwypeChangeIME(lpparam);
                 lowerLongpressMinimum(lpparam);
 			}
 			catch (Exception ex)
@@ -157,6 +158,38 @@ public class SwypeTweaks implements IXposedHookLoadPackage
             }
         });
 	}
+	
+	// short press Swype button to change IME
+	private void pressSwypeChangeIME(LoadPackageParam lpparam)
+    {
+        final ClassLoader loader = lpparam.classLoader;
+
+        Class<?> KeyClass = XposedHelpers.findClass("com.nuance.swype.input.KeyboardEx.Key", loader);
+        final int SWYPE_CODE = 43575;
+        XposedHelpers.findAndHookMethod("com.nuance.swype.input.IME", lpparam.classLoader, "onKey", android.graphics.Point.class, int.class, int[].class, KeyClass, long.class, new XC_MethodHook()
+        {
+            @Override
+            protected void beforeHookedMethod(MethodHookParam param) throws Throwable
+            {
+                int code = (int)param.args[1];
+                if (code != SWYPE_CODE)
+                {
+                    return;
+                }
+
+                XSharedPreferences preferences = new XSharedPreferences(PACKAGE_NAME);
+                String inputId = preferences.getString("longPressAction", "None");
+
+                if (inputId.equals("None"))
+                {
+                    return;
+                }
+
+                switchIME(param.thisObject, inputId);
+                return;
+            }
+        });
+    }
 	
 	private void disableEmoji(LoadPackageParam lpparam)
 	{
