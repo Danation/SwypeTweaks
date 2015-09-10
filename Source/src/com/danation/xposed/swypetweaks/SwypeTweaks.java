@@ -37,7 +37,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 {
                     replaceDragon(lpparam);
                 }
-			    longPressEnterChangeIME(lpparam);
+			    longPressSpeechChangeIME(lpparam);
                 lowerLongpressMinimum(lpparam);
 			}
 			catch (Exception ex)
@@ -119,12 +119,12 @@ public class SwypeTweaks implements IXposedHookLoadPackage
         });
 	}
 	
-	private void longPressEnterChangeIME(LoadPackageParam lpparam)
+	private void longPressSpeechChangeIME(LoadPackageParam lpparam)
     {
         final ClassLoader loader = lpparam.classLoader;
         
 	    Class<?> KeyClass = XposedHelpers.findClass("com.nuance.swype.input.KeyboardEx.Key", loader);
-        final int ENTER_CODE = 10;
+        final int SPEECH_KEY_CODE = 6463;
         XposedHelpers.findAndHookMethod("com.nuance.swype.input.KeyboardViewEx", lpparam.classLoader, "handleLongPress", KeyClass, new XC_MethodHook()
         {
             @Override
@@ -134,7 +134,9 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 
                 int code = ((int[])XposedHelpers.getObjectField(param.args[0], "codes"))[0];
 
-                if (code != ENTER_CODE)
+                log("key code: " + code);
+                
+                if (code != SPEECH_KEY_CODE)
                 {
                     return;
                 }

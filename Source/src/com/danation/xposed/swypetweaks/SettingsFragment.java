@@ -52,7 +52,7 @@ public class SettingsFragment extends PreferenceFragment
          imeListPreference.setEntries(entries.toArray(new String[0]));
          imeListPreference.setEntryValues(entryValues.toArray(new String[0]));
 
-         imeListPreference.setTitle("Long Press Enter: Change IME");
+         imeListPreference.setTitle("Long Press Speech Key: Change IME");
          imeListPreference.setKey("longPressAction");
          imeListPreference.setSummary("None");
          
