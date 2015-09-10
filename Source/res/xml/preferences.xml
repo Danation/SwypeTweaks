@@ -8,14 +8,6 @@
         android:summaryOn="Google Voice Recognition"
         android:summaryOff="Dragon Voice Recognition"
         />
-    <CheckBoxPreference
-        android:key="disableEmoji"
-        android:title="Disable Emoji (reboot)"
-        android:defaultValue="false"
-        android:summary="Set whether or not to show emoji in word suggestions"
-        android:summaryOn="Disable emoji in word suggestions"
-        android:summaryOff="Enable emoji in word suggestions"
-    />
     <PreferenceCategory android:title="Other" android:key="otherCategory" />
     <PreferenceCategory android:title="Color" android:key="colorCategory" />
     <CheckBoxPreference
