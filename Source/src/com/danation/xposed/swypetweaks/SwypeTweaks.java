@@ -87,20 +87,6 @@ public class SwypeTweaks implements IXposedHookLoadPackage
 	{
 	    final ClassLoader loader = lpparam.classLoader;
 	    
-	    try { //this method might not be in all versions of Swype
-		    XposedHelpers.findAndHookMethod("com.nuance.swype.input.IMEApplication", loader, "getSpeechProvider", new XC_MethodReplacement()
-	        {
-	            @Override
-	            protected Object replaceHookedMethod(MethodHookParam param) throws Throwable
-	            {
-	                return 1;
-	            }
-	        });
-	    }
-	    catch (Exception ex) {
-	    	log(ex);
-	    }
-	    
         XposedHelpers.findAndHookMethod("com.nuance.swype.input.InputView", loader, "startSpeech", new XC_MethodReplacement()
         {
             
