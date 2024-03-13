@@ -98,7 +98,7 @@ public class SwypeTweaks implements IXposedHookLoadPackage
                 //Get instance of com.nuance.swype.input.IME
                 Object mIme = XposedHelpers.getObjectField(param.thisObject, "mIme");
                 
-                switchIME(mIme, "com.google.android.googlequicksearchbox/com.google.android.voicesearch.ime.VoiceInputMethodService");
+                switchIME(mIme, "com.google.android.tts/com.google.android.apps.speech.tts.googletts.settings.asr.voiceime.VoiceInputMethodService");
                 
                 return null;
             }
